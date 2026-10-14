@@ -81,7 +81,6 @@ describe("CATALOG", () => {
       "gemini-live-2.5-flash-native-audio",
       "gemini-3.5-transcribe-live-preview",
       "imagen-4.0-generate-001",
-      "gemini-3.7-flash",
       "gemini-4-argon",
       "lyria-3-pro-preview",
       "alphafold3-request",

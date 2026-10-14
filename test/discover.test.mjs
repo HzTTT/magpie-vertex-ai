@@ -257,15 +257,17 @@ describe("discover", () => {
     })
   })
 
-  test("a discovered-only model with only transient failures stays unavailable", async () => {
+  test("a discovered-only model with only transient failures is kept, flagged, in the regions that listed it", async () => {
     await withDir(async (dir) => {
       const ctx = fakeCtx({
         listing: (publisher) => (publisher === "google" ? { publisherModels: [{ name: "publishers/google/models/gemini-9-flash" }] } : {}),
         verdict: () => THROTTLED,
       })
       const data = await discover(ctx, { dir, retryDelay: 0 })
-      expect(data.unavailable).toContainEqual({ id: "gemini-9-flash", publisher: "google", family: "gemini", reason: "throttled" })
-      expect(data.models.find((m) => m.id === "gemini-9-flash")).toBeUndefined()
+      const kept = data.models.find((m) => m.id === "gemini-9-flash")
+      expect(kept).toMatchObject({ publisher: "google", family: "gemini", transient: true })
+      expect(kept.regions).toContain("global")
+      expect(data.unavailable.find((u) => u.id === "gemini-9-flash")).toBeUndefined()
     })
   })
 
@@ -317,15 +319,15 @@ describe("discover", () => {
     })
   })
 
-  test("a persistent quota 429 on generate marks the model throttled", async () => {
+  test("a persistent quota 429 on generate keeps a discovered model, flagged transient", async () => {
     await withDir(async (dir) => {
       const ctx = fakeCtx({
-        listing: (publisher) => (publisher === "google" ? { publisherModels: [{ name: "publishers/google/models/gemini-3.7-flash" }] } : {}),
-        verdict: table({ "gemini-3.7-flash": { countTokens: OK, generateContent: THROTTLED } }),
+        listing: (publisher) => (publisher === "google" ? { publisherModels: [{ name: "publishers/google/models/gemini-9-flash" }] } : {}),
+        verdict: table({ "gemini-9-flash": { countTokens: OK, generateContent: THROTTLED } }),
       })
       const data = await discover(ctx, { dir, retryDelay: 0 })
-      expect(data.unavailable).toContainEqual({ id: "gemini-3.7-flash", publisher: "google", family: "gemini", reason: "throttled" })
-      expect(ctx.calls.filter((c) => c.op === "generateContent" && c.id === "gemini-3.7-flash").length).toBe(2)
+      expect(data.models.find((m) => m.id === "gemini-9-flash")).toMatchObject({ transient: true })
+      expect(ctx.calls.filter((c) => c.op === "generateContent" && c.id === "gemini-9-flash").length).toBe(2)
     })
   })
 
