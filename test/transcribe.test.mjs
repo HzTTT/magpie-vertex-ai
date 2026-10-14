@@ -118,6 +118,17 @@ describe("segment formats (srt / vtt / verbose_json)", () => {
     expect(await res.text()).toContain("00:00:01,500 --> 00:00:03,250\nworld")
   })
 
+  test("timed formats on the transcribe-only model run on gemini-2.5-flash; plain text stays on the chosen model", async () => {
+    const transcribe = { ...gemini, id: "gemini-3.5-transcribe-preview", key: "gemini-3.5-transcribe-preview" }
+    const timed = harness(() => reply(SEGMENTS))
+    await handle(request(form({ file: wav(), response_format: "srt" }), undefined, transcribe), timed.ctx)
+    expect(timed.calls[0].url).toContain("/models/gemini-2.5-flash:generateContent")
+
+    const plain = harness(() => reply("hello world"))
+    await handle(request(form({ file: wav() }), undefined, transcribe), plain.ctx)
+    expect(plain.calls[0].url).toContain("/models/gemini-3.5-transcribe-preview:generateContent")
+  })
+
   test("vtt renders WebVTT with dot-separated milliseconds", async () => {
     const { ctx } = harness(() => reply(SEGMENTS))
     const res = await handle(request(form({ file: wav(), response_format: "vtt" })), ctx)
