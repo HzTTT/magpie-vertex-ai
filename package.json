@@ -1,0 +1,32 @@
+{
+  "name": "magpie-vertex-ai",
+  "version": "0.1.0",
+  "description": "magpie provider plugin: every callable Google Vertex AI model of a GCP project, signed in with a service account or Application Default Credentials",
+  "type": "module",
+  "main": "./index.mjs",
+  "files": [
+    "index.mjs",
+    "lib",
+    "scripts",
+    "README.md"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "magpie",
+    "magpie-plugin",
+    "vertex-ai",
+    "google-cloud",
+    "provider"
+  ],
+  "license": "MIT",
+  "repository": "github:HzTTT/magpie-vertex-ai",
+  "scripts": {
+    "test": "bun test",
+    "discover": "bun scripts/discover.mjs"
+  },
+  "magpie": {
+    "maxConcurrency": 16,
+    "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234285F4' d='M12 2l8.66 5v10L12 22l-8.66-5V7z'/%3E%3C/svg%3E"
+  }
+}

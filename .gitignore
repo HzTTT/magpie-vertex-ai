@@ -1,0 +1,5 @@
+node_modules/
+.DS_Store
+*-sa.json
+*credentials*.json
+application_default_credentials.json
