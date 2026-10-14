@@ -103,12 +103,19 @@ describe("segment formats (srt / vtt / verbose_json)", () => {
     const { ctx, calls } = harness(() => reply(SEGMENTS))
     const res = await handle(request(form({ file: wav(), response_format: "srt" })), ctx)
 
-    expect(calls[0].body.generationConfig.responseMimeType).toBe("application/json")
-    expect(calls[0].body.generationConfig.responseSchema.required).toEqual(["segments"])
+    expect(calls[0].body.generationConfig.responseMimeType).toBeUndefined()
+    expect(calls[0].body.generationConfig.responseSchema).toBeUndefined()
     expect(res.headers.get("content-type")).toMatch(/^text\/plain/)
     expect(await res.text()).toBe(
       "1\n00:00:00,000 --> 00:00:01,500\nHello\n\n2\n00:00:01,500 --> 00:00:03,250\nworld\n",
     )
+  })
+
+  test("a segment answer wrapped in a code fence is still parsed", async () => {
+    const { ctx } = harness(() => reply("```json\n" + SEGMENTS + "\n```"))
+    const res = await handle(request(form({ file: wav(), response_format: "srt" })), ctx)
+    expect(res.status).toBe(200)
+    expect(await res.text()).toContain("00:00:01,500 --> 00:00:03,250\nworld")
   })
 
   test("vtt renders WebVTT with dot-separated milliseconds", async () => {
